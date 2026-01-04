@@ -1,6 +1,3 @@
-<<<<<<< Updated upstream
-# habit-dashboard
-=======
 # Habit Dashboard
 
 A beautiful, pixel-perfect habit tracking and life analytics dashboard built with React, Vite, Tailwind CSS, and Firebase.
@@ -491,4 +488,3 @@ For issues or questions, check the code comments and Firebase documentation:
 ---
 
 **Happy habit tracking! 🎯**
->>>>>>> Stashed changes
