@@ -1,0 +1,120 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    background-color: #F3F7F1;
+    color: #1F2937;
+  }
+
+  html.dark body {
+    background-color: #1F2937;
+    color: #F3F4F6;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  code {
+    font-family: monospace;
+  }
+}
+
+@layer utilities {
+  .card-header-green {
+    background: #6AA84F;
+    color: white;
+  }
+
+  .grid-day-header {
+    background: #F7FBF7;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+  }
+
+  html.dark .grid-day-header {
+    background: #111827;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .habit-grid-scroll {
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F3F7F1;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  background: #1F2937;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #6AA84F;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #5a9940;
+}
+
+/* Print Styles */
+@media print {
+  @page {
+    margin: 1in;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .print\\:hidden {
+    display: none !important;
+  }
+
+  .print\\:block {
+    display: block !important;
+  }
+
+  .print-content {
+    color: black !important;
+  }
+
+  .print-content h1,
+  .print-content h2,
+  .print-content h3 {
+    color: black !important;
+  }
+
+  .print-content table {
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  .print-content table th,
+  .print-content table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+  }
+
+  .print-content table th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+  }
+}
