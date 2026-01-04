@@ -89,52 +89,130 @@ const Login = () => {
     try {
       if (isSignup) {
         await createUser(email, password, name.trim());
+        // After signup, user will be redirected but email verification notice will show
+        // because emailVerified will be false
+        navigate('/dashboard');
       } else {
-        await signIn(email, password);
+        const user = await signIn(email, password);
+        // Check if email is verified after sign in
+        if (user && !user.emailVerified) {
+          // User will see verification notice when ProtectedRoute checks
+          navigate('/dashboard');
+        } else {
+          navigate('/dashboard');
+        }
       }
-      navigate('/dashboard');
     } catch (err) {
-      // Handle Firebase errors with user-friendly messages
-      let errorMessage = 'Authentication failed';
+      // Handle Firebase errors with user-friendly generic messages
+      let errorMessage = 'Authentication failed. Please try again.';
+      let fieldError = {};
       
       if (err.code) {
         switch (err.code) {
+          // Email validation errors
           case 'auth/invalid-email':
             errorMessage = 'Please enter a valid email address';
-            setFieldErrors({ email: 'Please enter a valid email address' });
+            fieldError = { email: 'Please enter a valid email address' };
             break;
-          case 'auth/user-disabled':
-            errorMessage = 'This account has been disabled';
-            break;
+          
+          // User not found / Invalid credentials (handles deleted users, wrong email/password)
+          case 'auth/invalid-credential':
           case 'auth/user-not-found':
-            errorMessage = 'No account found with this email address';
+            errorMessage = 'User not found. Please check your email address or create a new account.';
+            fieldError = { email: 'User not found' };
             break;
+          
+          // Wrong password / Invalid credentials
           case 'auth/wrong-password':
-            errorMessage = 'Incorrect password';
-            setFieldErrors({ password: 'Incorrect password' });
+            errorMessage = 'Incorrect password. Please try again.';
+            fieldError = { password: 'Incorrect password' };
             break;
+          
+          // Account disabled
+          case 'auth/user-disabled':
+            errorMessage = 'This account has been disabled. Please contact support.';
+            break;
+          
+          // Email already in use
           case 'auth/email-already-in-use':
-            errorMessage = 'An account with this email already exists';
-            setFieldErrors({ email: 'This email is already registered' });
+            errorMessage = 'An account with this email already exists. Please sign in instead.';
+            fieldError = { email: 'This email is already registered' };
             break;
+          
+          // Password validation errors
           case 'auth/weak-password':
-            errorMessage = 'Password is too weak. Please use a stronger password';
-            setFieldErrors({ password: 'Password is too weak. Please use at least 6 characters' });
+            errorMessage = 'Password is too weak. Please use a stronger password with at least 6 characters.';
+            fieldError = { password: 'Password is too weak' };
             break;
+          case 'auth/operation-not-allowed':
+            errorMessage = 'This sign-in method is not enabled. Please contact support.';
+            break;
+          
+          // Network and rate limiting errors
           case 'auth/network-request-failed':
-            errorMessage = 'Network error. Please check your internet connection';
+            errorMessage = 'Network error. Please check your internet connection and try again.';
             break;
           case 'auth/too-many-requests':
-            errorMessage = 'Too many failed attempts. Please try again later';
+            errorMessage = 'Too many failed attempts. Please try again later or reset your password.';
             break;
+          case 'auth/quota-exceeded':
+            errorMessage = 'Service temporarily unavailable. Please try again later.';
+            break;
+          
+          // Email verification errors
+          case 'auth/requires-recent-login':
+            errorMessage = 'For security, please sign out and sign in again before making this change.';
+            break;
+          
+          // Invalid argument errors
+          case 'auth/invalid-argument':
+            errorMessage = 'Invalid information provided. Please check your input and try again.';
+            break;
+          case 'auth/invalid-user-token':
+          case 'auth/user-token-expired':
+            errorMessage = 'Your session has expired. Please sign in again.';
+            break;
+          
+          // Provider errors
+          case 'auth/account-exists-with-different-credential':
+            errorMessage = 'An account already exists with a different sign-in method.';
+            break;
+          case 'auth/credential-already-in-use':
+            errorMessage = 'This credential is already associated with a different account.';
+            break;
+          
+          // Generic fallback for unknown errors
           default:
-            errorMessage = err.message || 'Authentication failed';
+            // Check if error message contains keywords to provide better context
+            const errorMsg = err.message || '';
+            if (errorMsg.toLowerCase().includes('password')) {
+              errorMessage = 'Invalid password. Please check your password and try again.';
+              fieldError = { password: 'Invalid password' };
+            } else if (errorMsg.toLowerCase().includes('email')) {
+              errorMessage = 'Invalid email address. Please check your email and try again.';
+              fieldError = { email: 'Invalid email' };
+            } else if (errorMsg.toLowerCase().includes('network') || errorMsg.toLowerCase().includes('connection')) {
+              errorMessage = 'Connection error. Please check your internet and try again.';
+            } else {
+              errorMessage = 'Authentication failed. Please check your credentials and try again.';
+            }
         }
       } else {
-        errorMessage = err.message || 'Authentication failed';
+        // Handle non-Firebase errors
+        const errorMsg = err.message || '';
+        if (errorMsg.toLowerCase().includes('network') || errorMsg.toLowerCase().includes('fetch')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (errorMsg.toLowerCase().includes('timeout')) {
+          errorMessage = 'Request timed out. Please try again.';
+        } else {
+          errorMessage = 'An unexpected error occurred. Please try again.';
+        }
       }
       
       setError(errorMessage);
+      if (Object.keys(fieldError).length > 0) {
+        setFieldErrors(fieldError);
+      }
     } finally {
       setLoading(false);
     }
