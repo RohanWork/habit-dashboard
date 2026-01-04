@@ -31,10 +31,20 @@ export default {
           'from': { transform: 'translateY(20px)', opacity: '0' },
           'to': { transform: 'translateY(0)', opacity: '1' },
         },
+        slideDown: {
+          'from': { transform: 'translateY(-10px)', opacity: '0' },
+          'to': { transform: 'translateY(0)', opacity: '1' },
+        },
+        scaleIn: {
+          'from': { transform: 'scale(0.9)', opacity: '0' },
+          'to': { transform: 'scale(1)', opacity: '1' },
+        },
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
         'slide-up': 'slideUp 0.3s ease-out',
+        'slide-down': 'slideDown 0.3s ease-out',
+        'scale-in': 'scaleIn 0.3s ease-out',
       },
     },
   },

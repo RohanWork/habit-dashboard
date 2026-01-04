@@ -41,8 +41,8 @@ const Dashboard = () => {
   // Initialize reminder scheduler when habits or settings change
   useEffect(() => {
     if (habits.length > 0 && notificationSettings?.browserEnabled) {
-      console.log('[Reminder] Initializing reminder scheduler on Dashboard...');
-      console.log('[Reminder] Habits with reminders:', habits.filter(h => h.reminderEnabled && h.reminderTime && h.active && !h.archived).map(h => ({ name: h.name, time: h.reminderTime, frequency: h.frequency })));
+      // console.log('[Reminder] Initializing reminder scheduler on Dashboard...');
+      // console.log('[Reminder] Habits with reminders:', habits.filter(h => h.reminderEnabled && h.reminderTime && h.active && !h.archived).map(h => ({ name: h.name, time: h.reminderTime, frequency: h.frequency })));
       reminderScheduler.startDailyCheck(habits, notificationSettings, sendBrowserNotification);
       
       // Log scheduled reminders after a short delay
@@ -50,10 +50,10 @@ const Dashboard = () => {
         reminderScheduler.logScheduledReminders(habits);
       }, 1000);
     } else {
-      console.log('[Reminder] Not initializing scheduler on Dashboard:', {
-        hasHabits: habits.length > 0,
-        browserEnabled: notificationSettings?.browserEnabled
-      });
+      // console.log('[Reminder] Not initializing scheduler on Dashboard:', {
+      //   hasHabits: habits.length > 0,
+      //   browserEnabled: notificationSettings?.browserEnabled
+      // });
     }
     
     return () => {
@@ -114,7 +114,7 @@ const Dashboard = () => {
       // Save to Firebase
       await saveDailyLog(user.uid, selectedDate, updatedLog);
     } catch (error) {
-      console.error('Error updating habit:', error);
+      // console.error('Error updating habit:', error);
       // Revert state on error
       setWeekLogs(prev => ({
         ...prev,
@@ -156,7 +156,7 @@ const Dashboard = () => {
           });
           // saved and updated locally
       } catch (error) {
-        console.error('Error updating metric:', error);
+        // console.error('Error updating metric:', error);
       }
     };
 
@@ -181,7 +181,7 @@ const Dashboard = () => {
         setWeekLogs(logsMap);
         // fetched week logs
       } catch (error) {
-        console.error('Error fetching week logs:', error);
+        // console.error('Error fetching week logs:', error);
       }
     };
 
@@ -209,7 +209,7 @@ const Dashboard = () => {
         });
         setHistoricalLogs(logsMap);
       } catch (error) {
-        console.error('Error fetching historical logs:', error);
+        // console.error('Error fetching historical logs:', error);
       }
     };
 

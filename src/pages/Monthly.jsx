@@ -104,8 +104,8 @@ const Monthly = () => {
   // Initialize reminder scheduler when habits or settings change
   useEffect(() => {
     if (habits.length > 0 && notificationSettings?.browserEnabled) {
-      console.log('[Reminder] Initializing reminder scheduler...');
-      console.log('[Reminder] Habits with reminders:', habits.filter(h => h.reminderEnabled && h.reminderTime && h.active && !h.archived).map(h => ({ name: h.name, time: h.reminderTime, frequency: h.frequency })));
+      // console.log('[Reminder] Initializing reminder scheduler...');
+      // console.log('[Reminder] Habits with reminders:', habits.filter(h => h.reminderEnabled && h.reminderTime && h.active && !h.archived).map(h => ({ name: h.name, time: h.reminderTime, frequency: h.frequency })));
       reminderScheduler.startDailyCheck(habits, notificationSettings, sendBrowserNotification);
       
       // Log scheduled reminders after a short delay
@@ -113,10 +113,10 @@ const Monthly = () => {
         reminderScheduler.logScheduledReminders(habits);
       }, 1000);
     } else {
-      console.log('[Reminder] Not initializing scheduler:', {
-        hasHabits: habits.length > 0,
-        browserEnabled: notificationSettings?.browserEnabled
-      });
+      // console.log('[Reminder] Not initializing scheduler:', {
+      //   hasHabits: habits.length > 0,
+      //   browserEnabled: notificationSettings?.browserEnabled
+      // });
     }
     
     return () => {
@@ -189,7 +189,7 @@ const Monthly = () => {
         setMonthLogs(logsMap);
         // fetched month logs
       } catch (error) {
-        console.error('Error fetching month logs:', error);
+        // console.error('Error fetching month logs:', error);
       }
     };
 
@@ -258,7 +258,7 @@ const Monthly = () => {
         [dateString]: updatedLog,
       });
     } catch (error) {
-      console.error('Error updating habit:', error);
+      // console.error('Error updating habit:', error);
     }
   };
 
@@ -291,7 +291,7 @@ const Monthly = () => {
         [dateString]: updatedLog,
       });
     } catch (error) {
-      console.error('Error updating metric:', error);
+      // console.error('Error updating metric:', error);
     }
   };
 
@@ -755,7 +755,7 @@ const Monthly = () => {
                     attempts++;
                   }
                 } catch (error) {
-                  console.error('Error restoring category:', error);
+                  // console.error('Error restoring category:', error);
                 }
               }
               
