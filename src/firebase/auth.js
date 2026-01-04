@@ -3,7 +3,9 @@ import {
   signInWithEmailAndPassword,
   signOut,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  sendEmailVerification,
   deleteUser,
+  reload,
 } from 'firebase/auth';
 import { auth, db } from './config';
 import { doc, setDoc, updateDoc } from 'firebase/firestore';
@@ -14,14 +16,50 @@ export const createUser = async (email, password, name) => {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
+    // Send email verification
+    await sendEmailVerification(user);
+
     // Create user document in Firestore
     await setDoc(doc(db, 'users', user.uid), {
       name,
       email,
+      emailVerified: false,
       createdAt: new Date().toISOString(),
     });
 
     return user;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Resend email verification
+export const resendVerificationEmail = async () => {
+  try {
+    const user = auth.currentUser;
+    if (!user) throw new Error('No user logged in');
+    
+    if (user.emailVerified) {
+      throw new Error('Email is already verified');
+    }
+    
+    await sendEmailVerification(user);
+    return true;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// Reload user to get latest verification status
+export const reloadUser = async () => {
+  try {
+    const user = auth.currentUser;
+    if (user) {
+      await reload(user);
+      // Return the updated user from auth.currentUser after reload
+      return auth.currentUser;
+    }
+    return null;
   } catch (error) {
     throw error;
   }
@@ -54,7 +92,7 @@ export const logout = async () => {
         }, { merge: true });
       } catch (error) {
         // Log error but don't fail the logout process
-        console.error('Error updating last login timestamp:', error);
+        // console.error('Error updating last login timestamp:', error);
       }
     }
     

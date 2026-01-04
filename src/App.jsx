@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider, useAuth } from './hooks/useAuth.jsx';
 import { useTheme } from './hooks/useTheme';
 import { CategoriesProvider } from './contexts/CategoriesContext';
+import { resendVerificationEmail } from './firebase/auth';
+import { auth } from './firebase/config';
 import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Monthly from './pages/Monthly';
@@ -12,16 +14,170 @@ import Todos from './pages/Todos';
 import Guide from './pages/Guide';
 import ProfileDropdown from './components/ProfileDropdown';
 
+// Email Verification Component
+const EmailVerificationNotice = () => {
+  const { user, refreshUser } = useAuth();
+  const [resending, setResending] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
+  const [resendError, setResendError] = useState('');
+  const [checking, setChecking] = useState(false);
+  
+  // Watch for email verification status changes
+  useEffect(() => {
+    if (user?.emailVerified) {
+      // Email is verified, the ProtectedRoute will automatically show the dashboard
+      // No need to do anything here, just let the component re-render
+    }
+  }, [user?.emailVerified]);
+
+  const handleResendVerification = async () => {
+    setResending(true);
+    setResendError('');
+    setResendSuccess(false);
+    
+    try {
+      await resendVerificationEmail();
+      setResendSuccess(true);
+      setTimeout(() => setResendSuccess(false), 5000);
+    } catch (error) {
+      // Handle Firebase errors with user-friendly messages
+      let errorMessage = 'Failed to resend verification email. Please try again.';
+      
+      if (error.code) {
+        switch (error.code) {
+          case 'auth/too-many-requests':
+            errorMessage = 'Too many requests. Please wait a few minutes before requesting another email.';
+            break;
+          case 'auth/user-not-found':
+          case 'auth/invalid-credential':
+            errorMessage = 'User not found. Please sign out and sign in again.';
+            break;
+          case 'auth/network-request-failed':
+            errorMessage = 'Network error. Please check your internet connection and try again.';
+            break;
+          case 'auth/requires-recent-login':
+            errorMessage = 'For security, please sign out and sign in again.';
+            break;
+          default:
+            if (error.message) {
+              errorMessage = error.message;
+            }
+        }
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      setResendError(errorMessage);
+    } finally {
+      setResending(false);
+    }
+  };
+
+  const handleCheckVerification = async () => {
+    setChecking(true);
+    setResendError('');
+    setResendSuccess(false);
+    
+    try {
+      // Refresh user to get latest verification status
+      await refreshUser();
+      
+      // Wait for state to update
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Check the current user from auth directly (most up-to-date)
+      const currentUser = auth.currentUser;
+      
+      if (currentUser?.emailVerified) {
+        setResendSuccess(true);
+        // Refresh one more time to ensure React state is updated
+        await refreshUser();
+        // Wait a moment for the state to propagate
+        await new Promise(resolve => setTimeout(resolve, 300));
+        // The ProtectedRoute will automatically re-render when user.emailVerified becomes true
+      } else {
+        setResendError('Email not verified yet. Please check your inbox and click the verification link in the email.');
+      }
+    } catch (error) {
+      setResendError('Failed to check verification status. Please try again.');
+    } finally {
+      setChecking(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-bg-light dark:bg-dark-bg flex items-center justify-center p-4">
+      <div className="max-w-md w-full bg-white dark:bg-dark-surface rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8">
+        <div className="text-center mb-6">
+          <div className="text-6xl mb-4">📧</div>
+          <h1 className="text-2xl font-bold text-text-dark dark:text-dark-text mb-2">
+            Verify Your Email
+          </h1>
+          <p className="text-text-gray dark:text-dark-gray">
+            We've sent a verification email to
+          </p>
+          <p className="text-primary font-semibold mt-1">{user?.email}</p>
+        </div>
+
+        <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-4 rounded-lg mb-6">
+          <p className="text-sm text-blue-800 dark:text-blue-300">
+            <strong>Please check your inbox</strong> and click the verification link to activate your account. 
+            You won't be able to access the app until your email is verified.
+          </p>
+        </div>
+
+        {resendSuccess && (
+          <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 rounded-lg mb-4">
+            <p className="text-sm text-green-800 dark:text-green-300">
+              ✓ Verification email sent! Please check your inbox.
+            </p>
+          </div>
+        )}
+
+        {resendError && (
+          <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded-lg mb-4">
+            <p className="text-sm text-red-800 dark:text-red-300">
+              {resendError}
+            </p>
+          </div>
+        )}
+
+        <div className="space-y-3">
+          <button
+            onClick={handleResendVerification}
+            disabled={resending}
+            className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {resending ? 'Sending...' : 'Resend Verification Email'}
+          </button>
+          
+          <button
+            onClick={handleCheckVerification}
+            disabled={checking}
+            className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-text-dark dark:text-dark-text font-semibold py-3 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {checking ? 'Checking...' : "I've Verified My Email"}
+          </button>
+        </div>
+
+        <p className="text-xs text-text-gray dark:text-dark-gray text-center mt-6">
+          Didn't receive the email? Check your spam folder or try resending.
+        </p>
+      </div>
+    </div>
+  );
+};
+
 // Protected route wrapper
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-bg-light flex items-center justify-center">
+      <div className="min-h-screen bg-bg-light dark:bg-dark-bg flex items-center justify-center">
         <div className="text-center">
           <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-text-gray">Loading...</p>
+          <p className="text-text-gray dark:text-dark-gray">Loading...</p>
         </div>
       </div>
     );
@@ -29,6 +185,12 @@ const ProtectedRoute = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  // Check if email is verified
+  // Use key prop to force re-render when user changes
+  if (!user.emailVerified) {
+    return <EmailVerificationNotice key={`verify-${user.uid}-${user.emailVerified}`} />;
   }
 
   return children;
