@@ -5,10 +5,10 @@ This guide explains how to deploy the Habit Dashboard to Render.
 ## Configuration Files
 
 ### render.yaml
-This file contains the Render service configuration. The app is configured as a web service that:
+This file contains the Render service configuration. The app is configured as a **Web Service** that:
 - Builds the project using `npm install && npm run build`
-- Serves the built files from the `build` directory
-- Uses Vite preview server for serving the static files
+- Serves the built files from the `build` directory using Express server
+- The `server.js` file handles all routes properly for SPA routing
 
 ### .renderignore
 This file specifies which files and directories should be ignored during deployment.
@@ -21,13 +21,24 @@ This file specifies which files and directories should be ignored during deploym
 3. Connect your repository
 4. Render will automatically detect `render.yaml` and use the configuration
 
-### Option 2: Manual Configuration
-1. In Render dashboard, click "New" → "Static Site" (or "Web Service")
+### Option 2: Manual Configuration (Web Service - Recommended for SPA)
+1. In Render dashboard, click "New" → "Web Service"
 2. Connect your repository
 3. Configure the following:
    - **Build Command**: `npm install && npm run build`
+   - **Start Command**: `npm start`
+   - **Environment**: `Node`
+   - **Environment Variables**: 
+     - `NODE_ENV=production`
+
+### Option 3: Static Site (Alternative)
+If you prefer static site deployment:
+1. In Render dashboard, click "New" → "Static Site"
+2. Connect your repository
+3. Configure:
+   - **Build Command**: `npm install && npm run build`
    - **Publish Directory**: `build`
-   - **Start Command** (if using Web Service): `npm run preview -- --host --port $PORT`
+   - Note: The `_redirects` file in `public/` folder helps with routing
 
 ## Build Output
 
@@ -49,8 +60,10 @@ Note: Firebase configuration is already in the code. If you need to change it, u
 
 - The build output directory is set to `build` (configured in `vite.config.js`)
 - The app is a Single Page Application (SPA), so all routes should redirect to `index.html`
-- Render's static site service automatically handles SPA routing
-- If using web service, ensure the preview server is configured correctly
+- **Web Service is recommended** for proper SPA routing - the `server.js` file handles all routes correctly
+- The `server.js` file serves `index.html` for all routes, ensuring React Router works properly
+- If using static site, the `_redirects` file in `public/` folder helps with routing
+- The `_redirects` file will be copied to the build folder during build process
 
 ## Troubleshooting
 
@@ -60,8 +73,11 @@ Note: Firebase configuration is already in the code. If you need to change it, u
 - Check build logs in Render dashboard
 
 ### 404 Errors on Routes
-- Ensure SPA routing is configured (should be automatic with static sites)
-- Check that `index.html` is in the build folder
+- **Solution**: Use Web Service deployment instead of Static Site
+- The `server.js` file properly handles all routes by serving `index.html` for any path
+- If using static site, ensure `_redirects` file exists in `public/` folder (will be copied to build)
+- Verify that `server.js` is correctly serving files from the `build` directory
+- Check Render logs to see if the server is starting correctly
 
 ### Assets Not Loading
 - Verify that `public` folder files are copied to build
