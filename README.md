@@ -121,7 +121,7 @@ src/
 ### 1. Clone or Create Project
 
 ```bash
-cd d:\personal_projects\habit-dashboard
+https://github.com/RohanWork/habit-dashboard.git
 npm install
 ```
 
