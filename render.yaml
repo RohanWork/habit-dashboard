@@ -1,0 +1,17 @@
+services:
+  # Option 1: Static Site (Recommended - simpler and free tier friendly)
+  - type: static
+    name: habit-dashboard-static
+    buildCommand: npm install && npm run build
+    staticPublishPath: ./build
+  
+  # Option 2: Web Service (Use if you need server-side features)
+  # - type: web
+  #   name: habit-dashboard
+  #   env: node
+  #   buildCommand: npm install && npm run build
+  #   startCommand: npm start
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+
