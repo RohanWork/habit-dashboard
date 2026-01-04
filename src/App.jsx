@@ -9,6 +9,7 @@ import Monthly from './pages/Monthly';
 import Yearly from './pages/Yearly';
 import Analytics from './pages/Analytics';
 import Todos from './pages/Todos';
+import Guide from './pages/Guide';
 import ProfileDropdown from './components/ProfileDropdown';
 
 // Protected route wrapper
@@ -69,6 +70,7 @@ const Navigation = () => {
           <a href="/monthly" className={`font-medium transition ${isActive('/monthly') ? 'text-primary' : 'text-text-gray dark:text-dark-gray hover:text-text-dark dark:hover:text-dark-text'}`}>Habits</a>
           <a href="/analytics" className={`font-medium transition ${isActive('/analytics') ? 'text-primary' : 'text-text-gray dark:text-dark-gray hover:text-text-dark dark:hover:text-dark-text'}`}>Analytics</a>
           <a href="/todos" className={`font-medium transition ${isActive('/todos') ? 'text-primary' : 'text-text-gray dark:text-dark-gray hover:text-text-dark dark:hover:text-dark-text'}`}>To Do</a>
+          <a href="/guide" className={`font-medium transition ${isActive('/guide') ? 'text-primary' : 'text-text-gray dark:text-dark-gray hover:text-text-dark dark:hover:text-dark-text'}`}>Guide</a>
         </div>
 
         <div className="hidden md:flex items-center gap-4">
@@ -84,6 +86,7 @@ const Navigation = () => {
             <a href="/monthly" className={`block font-medium ${isActive('/monthly') ? 'text-primary' : 'text-text-gray dark:text-dark-gray'}`}>Habits</a>
             <a href="/analytics" className={`block font-medium ${isActive('/analytics') ? 'text-primary' : 'text-text-gray dark:text-dark-gray'}`}>Analytics</a>
             <a href="/todos" className={`block font-medium ${isActive('/todos') ? 'text-primary' : 'text-text-gray dark:text-dark-gray'}`}>To Do</a>
+            <a href="/guide" className={`block font-medium ${isActive('/guide') ? 'text-primary' : 'text-text-gray dark:text-dark-gray'}`}>Guide</a>
             <div className="pt-2 border-t border-gray-100 dark:border-gray-700">
               <ProfileDropdown />
             </div>
@@ -140,6 +143,15 @@ const AppContent = () => {
           <ProtectedRoute>
             <Navigation />
             <Todos />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/guide"
+        element={
+          <ProtectedRoute>
+            <Navigation />
+            <Guide />
           </ProtectedRoute>
         }
       />
